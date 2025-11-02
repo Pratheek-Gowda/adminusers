@@ -11,15 +11,16 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { userId, amount, reason } = JSON.parse(event.body);
+    const { userId, amount, reason, adminNotes, adminId } = JSON.parse(event.body);
+
+    const result = await pool.query(
+      'INSERT INTO credits (user_id, amount, status, reason, admin_notes, admin_id, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *',
+      [userId, amount, 'credited', reason, adminNotes, adminId]
+    );
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        message: 'Credit added',
-        userId, amount, reason
-      })
+      body: JSON.stringify({ success: true, credit: result.rows[0] })
     };
   } catch (error) {
     return {
