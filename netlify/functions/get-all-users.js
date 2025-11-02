@@ -15,7 +15,7 @@ exports.handler = async (event) => {
         COALESCE(SUM(CASE WHEN r.status = 'approved' THEN 1 ELSE 0 END), 0) as approved_count
       FROM users u
       LEFT JOIN referral_links rl ON u.id = rl.user_id
-      LEFT JOIN referrals r ON rl.referral_link_id = r.referral_link_id
+      LEFT JOIN referrals r ON rl.id = r.referral_link_id
       GROUP BY u.id, u.username, u.email, u.full_name, u.created_at
       ORDER BY u.created_at DESC
     `);
@@ -24,7 +24,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        users: result.rows
+        users: result.rows || []
       })
     };
   } catch (error) {
