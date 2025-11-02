@@ -9,8 +9,8 @@ exports.handler = async (event) => {
   try {
     const result = await pool.query(`
       SELECT 
-        r.id, r.referred_name, r.referred_email, r.status,
-        r.approved_at, r.approved_by, r.admin_notes,
+        r.id, r.referred_name, r.referred_email, r.referred_phone, r.status,
+        r.approved_at, r.approved_by_admin, r.created_at,
         u.username as referrer_name, u.email as referrer_email
       FROM referrals r
       JOIN referral_links rl ON r.referral_link_id = rl.id
