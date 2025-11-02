@@ -4,7 +4,279 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>History - Admin Panel</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Importing a modern, clean font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+        :root {
+            /* Define color palette */
+            --primary-color: #5d5dff; /* Blue/Purple Accent */
+            --secondary-color: #3f78ff;
+            --background-color: #1a1b26; /* Dark Background */
+            --surface-color: #24283b; /* Card/Sidebar Background */
+            --text-color: #c0caf5; /* Light Text */
+            --subtle-text: #7d8498;
+            --success-color: #73daca;
+            --danger-color: #f7768e;
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* --- Layout Container --- */
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* --- Sidebar (Navigation) --- */
+        .sidebar {
+            width: 250px;
+            background-color: var(--surface-color);
+            padding: 20px 0;
+            box-shadow: 4px 0 10px var(--shadow-dark);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .nav-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid #3b4261;
+            margin-bottom: 20px;
+        }
+
+        .nav-header h2 {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border-left: 5px solid transparent;
+        }
+
+        .nav-menu li a:hover {
+            background-color: #2e334a;
+            color: #ffffff;
+            border-left-color: var(--secondary-color);
+        }
+
+        .nav-menu li a.active {
+            background-color: #3b4261;
+            color: #ffffff;
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* --- Main Content Area --- */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable scrolling for main content */
+            padding: 0 30px 20px 30px;
+        }
+
+        /* --- Top Bar (Header) --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #3b4261;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background-color: var(--background-color);
+            z-index: 5;
+        }
+
+        .top-bar h1 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .user-info {
+            background-color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Content Area Specifics --- */
+        .content {
+            flex-grow: 1;
+        }
+
+        /* --- Filter Bar --- */
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow-dark);
+        }
+
+        .filter-bar input, .filter-bar select {
+            padding: 12px 15px;
+            border: 1px solid #3b4261;
+            border-radius: 8px;
+            background-color: #1a1b26;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .filter-bar input {
+            flex-grow: 1;
+        }
+        
+        .filter-bar select {
+            width: 180px;
+        }
+
+        .filter-bar input:focus, .filter-bar select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* --- Timeline Styling --- */
+        .timeline {
+            position: relative;
+            padding: 10px 0;
+            margin-left: 20px; /* Space for the line */
+        }
+
+        /* Vertical Line */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background-color: #3b4261;
+        }
+
+        /* Default Timeline Item (for loading or missing structure) */
+        .timeline > div {
+            font-style: italic;
+            color: var(--subtle-text);
+        }
+        
+        /* You would typically use a class like '.timeline-item' added by JS for structure */
+        /* Since the HTML is static, here is a template for the JS to create: */
+        /*
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 30px;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+            border-left: 5px solid transparent;
+            transition: background-color 0.3s;
+        }
+
+        .timeline-item:hover {
+            background-color: #2e334a;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -8px; 
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #3b4261; 
+            border: 3px solid var(--background-color);
+            z-index: 2;
+        }
+        
+        .timeline-item.approved {
+            border-left-color: var(--success-color);
+        }
+        .timeline-item.approved::before {
+            background-color: var(--success-color);
+        }
+
+        .timeline-item.rejected {
+            border-left-color: var(--danger-color);
+        }
+        .timeline-item.rejected::before {
+            background-color: var(--danger-color);
+        }
+
+        .timeline-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .timeline-status {
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .timeline-item.approved .timeline-status {
+            background-color: var(--success-color);
+            color: var(--background-color);
+        }
+        .timeline-item.rejected .timeline-status {
+            background-color: var(--danger-color);
+            color: #ffffff;
+        }
+
+        .timeline-user {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--subtle-text);
+        }
+        */
+    </style>
 </head>
 <body>
     <div class="container">
@@ -24,7 +296,7 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <h1>Approval History</h1>
+                <h1>📜 Approval History</h1>
                 <div class="user-info">
                     <span id="adminName">Admin</span>
                 </div>
@@ -32,7 +304,7 @@
 
             <div class="content">
                 <div class="filter-bar">
-                    <input type="text" id="historySearch" placeholder="Search history...">
+                    <input type="text" id="historySearch" placeholder="Search history (User, Admin, or ID)...">
                     <select id="historyFilter">
                         <option value="">All Status</option>
                         <option value="approved">Approved</option>
@@ -41,8 +313,8 @@
                 </div>
 
                 <div class="timeline" id="historyTimeline">
-                    <div style="text-align: center; padding: 20px;">Loading...</div>
-                </div>
+                    <div style="text-align: center; padding: 20px;">Loading historical events...</div>
+                    </div>
             </div>
         </main>
     </div>
