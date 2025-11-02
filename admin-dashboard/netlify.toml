@@ -1,11 +1,7 @@
-
 [build]
-  command = "npm run build"
-  publish = ".next"
-
-[build.environment]
-  DATABASE_URL = "postgresql://neondb_owner:npg_QaI1LqR5rhvY@ep-crimson-forest-aet1y7p5-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-  NODE_ENV = "production"
+  command = "echo 'Static site'"
+  publish = "."
+  functions = "netlify/functions"
 
 [[redirects]]
   from = "/*"
