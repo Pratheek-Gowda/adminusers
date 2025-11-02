@@ -27,10 +27,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        user: result.rows[0]
-      })
+      body: JSON.stringify({ success: true, user: result.rows[0] })
     };
   } catch (error) {
     return {
