@@ -1,5 +1,5 @@
 {
-  "buildCommand": "echo 'Admin Dashboard'",
+  "buildCommand": "echo 'Building Admin Dashboard'",
   "env": {
     "NEXT_PUBLIC_API_URL": "https://refer.pratheek.shop/api"
   },
@@ -7,6 +7,17 @@
     {
       "source": "/api/:path*",
       "destination": "https://refer.pratheek.shop/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
     }
   ]
 }
