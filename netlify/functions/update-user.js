@@ -11,11 +11,11 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { userId, fullName, email, phone, status } = JSON.parse(event.body);
+    const { userId, fullName, email } = JSON.parse(event.body);
 
     const result = await pool.query(
-      'UPDATE users SET full_name = $1, email = $2, phone = $3, status = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
-      [fullName, email, phone, status, userId]
+      'UPDATE users SET full_name = $1, email = $2 WHERE id = $3 RETURNING *',
+      [fullName, email, userId]
     );
 
     if (result.rows.length === 0) {
@@ -29,7 +29,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        user: result.rows
+        user: result.rows[0]
       })
     };
   } catch (error) {
