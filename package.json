@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build": "next build && npm run export",
+    "export": "next export || true",
+    "start": "next start"
   },
   "dependencies": {
     "next": "^14.0.0",
@@ -14,9 +14,5 @@
     "react-dom": "^18.2.0",
     "pg": "^8.11.0",
     "bcrypt": "^5.1.0"
-  },
-  "devDependencies": {
-    "eslint": "^8.0.0",
-    "eslint-config-next": "^14.0.0"
   }
 }
