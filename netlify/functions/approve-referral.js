@@ -11,11 +11,11 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { referralId, status, adminNotes, approvedBy } = JSON.parse(event.body);
+    const { referralId, status, approvedBy } = JSON.parse(event.body);
 
     const result = await pool.query(
-      'UPDATE referrals SET status = $1, approved_at = NOW(), approved_by = $2, admin_notes = $3 WHERE id = $4 RETURNING *',
-      [status, approvedBy, adminNotes, referralId]
+      'UPDATE referrals SET status = $1, approved_at = NOW(), approved_by_admin = $2 WHERE id = $3 RETURNING *',
+      [status, approvedBy, referralId]
     );
 
     if (result.rows.length === 0) {
@@ -29,7 +29,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        referral: result.rows
+        referral: result.rows[0]
       })
     };
   } catch (error) {
