@@ -4,7 +4,353 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Approvals - Admin Panel</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Importing a modern, clean font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+        :root {
+            /* Define color palette */
+            --primary-color: #5d5dff; /* Blue/Purple Accent */
+            --secondary-color: #3f78ff;
+            --background-color: #1a1b26; /* Dark Background */
+            --surface-color: #24283b; /* Card/Sidebar Background */
+            --text-color: #c0caf5; /* Light Text */
+            --subtle-text: #7d8498;
+            --success-color: #73daca;
+            --pending-color: #ff9e64;
+            --danger-color: #f7768e;
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* --- Layout Container --- */
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* --- Sidebar (Navigation) --- */
+        .sidebar {
+            width: 250px;
+            background-color: var(--surface-color);
+            padding: 20px 0;
+            box-shadow: 4px 0 10px var(--shadow-dark);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .nav-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid #3b4261;
+            margin-bottom: 20px;
+        }
+
+        .nav-header h2 {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border-left: 5px solid transparent;
+        }
+
+        .nav-menu li a:hover {
+            background-color: #2e334a;
+            color: #ffffff;
+            border-left-color: var(--secondary-color);
+        }
+
+        .nav-menu li a.active {
+            background-color: #3b4261;
+            color: #ffffff;
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* --- Main Content Area --- */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable scrolling for main content */
+            padding: 0 30px 20px 30px; 
+        }
+
+        /* --- Top Bar (Header) --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #3b4261;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background-color: var(--background-color);
+            z-index: 5;
+        }
+
+        .top-bar h1 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .user-info {
+            background-color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Content Area Specifics --- */
+        .content {
+            flex-grow: 1;
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px var(--shadow-dark);
+        }
+
+        /* --- Filter Bar --- */
+        .filter-bar {
+            margin-bottom: 20px;
+        }
+        
+        #statusFilter {
+            padding: 12px 15px;
+            border: 1px solid #3b4261;
+            border-radius: 8px;
+            background-color: #1a1b26;
+            color: var(--text-color);
+            font-size: 1rem;
+            width: 200px;
+            transition: border-color 0.3s;
+        }
+
+        #statusFilter:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* --- Table Styling --- */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background-color: #3b4261;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        th {
+            padding: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #3b4261;
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #2e334a;
+        }
+
+        td {
+            padding: 15px;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .status-pending {
+            background-color: var(--pending-color);
+            color: var(--background-color);
+        }
+        .status-approved {
+            background-color: var(--success-color);
+            color: var(--background-color);
+        }
+        .status-rejected {
+            background-color: var(--danger-color);
+            color: #ffffff;
+        }
+
+        /* Action Buttons */
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s, opacity 0.3s;
+            margin-right: 5px;
+        }
+
+        .btn-action {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+
+        .btn-action:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* --- MODAL STYLING (Approval Modal) --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 100; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            margin: 10% auto; 
+            padding: 30px;
+            border: 1px solid #3b4261;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 10px 25px var(--shadow-dark);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .close {
+            color: var(--subtle-text);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--danger-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .modal-content select,
+        .modal-content textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #3b4261;
+            border-radius: 6px;
+            background-color: #1a1b26;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .modal-content select:focus,
+        .modal-content textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .modal-content button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .modal-content button[type="submit"]:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -19,12 +365,12 @@
                 <li><a href="/credits.html">💰 Credits</a></li>
                 <li><a href="/history.html">📜 History</a></li>
                 <li><a href="#" onclick="logout()">🚪 Logout</a></li>
-            </ul>
+            </ul
         </nav>
 
         <main class="main-content">
             <header class="top-bar">
-                <h1>Referral Approvals</h1>
+                <h1>✅ Referral Approvals</h1>
                 <div class="user-info">
                     <span id="adminName">Admin</span>
                 </div>
@@ -34,9 +380,9 @@
                 <div class="filter-bar">
                     <select id="statusFilter">
                         <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="pending">⏳ Pending</option>
+                        <option value="approved">✓ Approved</option>
+                        <option value="rejected">✗ Rejected</option>
                     </select>
                 </div>
 
@@ -54,18 +400,17 @@
                             </tr>
                         </thead>
                         <tbody id="approvalsTable">
-                            <tr><td colspan="7" style="text-align: center;">Loading...</td></tr>
-                        </tbody>
+                            <tr><td colspan="7" style="text-align: center;">Loading pending referrals...</td></tr>
+                            </tbody>
                     </table>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Approval Modal -->
     <div id="approvalModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" onclick="document.getElementById('approvalModal').style.display='none'">&times;</span>
             <h2>Approve/Reject Referral</h2>
             <form onsubmit="submitApproval(event)">
                 <input type="hidden" id="approvalReferralId">
@@ -73,15 +418,15 @@
                     <label>Status</label>
                     <select id="approvalStatus" required>
                         <option value="">Select Status</option>
-                        <option value="approved">Approve</option>
-                        <option value="rejected">Reject</option>
+                        <option value="approved">✓ Approve</option>
+                        <option value="rejected">✗ Reject</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Admin Notes</label>
-                    <textarea id="approvalNotes" rows="4"></textarea>
+                    <label>Admin Notes (Required for Rejection)</label>
+                    <textarea id="approvalNotes" rows="4" placeholder="Enter reason for approval or rejection..."></textarea>
                 </div>
-                <button type="submit">Submit</button>
+                <button type="submit">Submit Decision</button>
             </form>
         </div>
     </div>
