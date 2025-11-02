@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="nav-header">
+                <h2>🛡️ Admin</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard.html" class="active">📊 Dashboard</a></li>
+                <li><a href="/users.html">👥 Users</a></li>
+                <li><a href="/approvals.html">✅ Approvals</a></li>
+                <li><a href="/credits.html">💰 Credits</a></li>
+                <li><a href="/history.html">📜 History</a></li>
+                <li><a href="#" onclick="logout()">🚪 Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+         
