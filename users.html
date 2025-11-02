@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="nav-header">
+                <h2>🛡️ Admin</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard.html">📊 Dashboard</a></li>
+                <li><a href="/users.html" class="active">👥 Users</a></li>
+                <li><a href="/approvals.html">✅ Approvals</a></li>
+                <li><a href="/credits.html">💰 Credits</a></li>
+                <li><a href="/history.html">📜 History</a></li>
+                <li><a href="#" onclick="logout()">🚪 Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h1>User Management</h1>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="search-bar">
+                    <input type="text" id="searchUsers" placeholder="Search users...">
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Full Name</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <tr><td colspan="7" style="text-align: center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit User</h2>
+            <form onsubmit="saveUserChanges(event)">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editFullName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="editPhone">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editStatus">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/users.js"></script>
+</body>
+</html>
