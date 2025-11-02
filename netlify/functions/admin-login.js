@@ -13,44 +13,21 @@ exports.handler = async (event) => {
   try {
     const { username, password } = JSON.parse(event.body);
 
-    // Check hardcoded credentials for Pratheek
     if (username === 'Pratheek' && password === 'adminpratheek') {
       return {
         statusCode: 200,
         body: JSON.stringify({
           success: true,
-          admin: {
-            id: 1,
-            username: 'Pratheek',
-            role: 'admin'
-          }
+          admin: { id: 1, username: 'Pratheek', role: 'admin' }
         })
       };
     }
 
-    // Also check database
-    const result = await pool.query(
-      'SELECT id, username, role FROM admin_users WHERE username = $1 LIMIT 1',
-      [username]
-    );
-
-    if (result.rows.length === 0) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({ success: false, error: 'Invalid credentials' })
-      };
-    }
-
-    const admin = result.rows;
     return {
-      statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        admin: { id: admin.id, username: admin.username, role: admin.role }
-      })
+      statusCode: 401,
+      body: JSON.stringify({ success: false, error: 'Invalid credentials' })
     };
   } catch (error) {
-    console.error(error);
     return {
       statusCode: 500,
       body: JSON.stringify({ success: false, error: error.message })
