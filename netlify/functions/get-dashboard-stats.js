@@ -7,25 +7,26 @@ const pool = new Pool({
 
 exports.handler = async (event) => {
   try {
-    const usersCount = await pool.query('SELECT COUNT(*) as count FROM users');
-    const linksCount = await pool.query('SELECT COUNT(*) as count FROM referral_links');
-    const referralsCount = await pool.query('SELECT COUNT(*) as count FROM referrals');
-    const approvedCount = await pool.query("SELECT COUNT(*) as count FROM referrals WHERE status = 'approved'");
-    const pendingCount = await pool.query("SELECT COUNT(*) as count FROM referrals WHERE status = 'pending'");
-    const rejectedCount = await pool.query("SELECT COUNT(*) as count FROM referrals WHERE status = 'rejected'");
+    const users = await pool.query('SELECT COUNT(*) as count FROM users');
+    const links = await pool.query('SELECT COUNT(*) as count FROM referral_links');
+    const referrals = await pool.query('SELECT COUNT(*) as count FROM referrals');
+    const approved = await pool.query("SELECT COUNT(*) as count FROM referrals WHERE status = 'approved'");
+    const pending = await pool.query("SELECT COUNT(*) as count FROM referrals WHERE status = 'pending'");
+    const rejected = await pool.query("SELECT COUNT(*) as count FROM referrals WHERE status = 'rejected'");
+    const credits = await pool.query('SELECT COALESCE(SUM(amount), 0) as total FROM credits WHERE status = \'credited\'');
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
         stats: {
-          totalUsers: parseInt(usersCount.rows[0].count),
-          totalLinks: parseInt(linksCount.rows[0].count),
-          totalReferrals: parseInt(referralsCount.rows[0].count),
-          approvedReferrals: parseInt(approvedCount.rows[0].count),
-          pendingReferrals: parseInt(pendingCount.rows[0].count),
-          rejectedReferrals: parseInt(rejectedCount.rows[0].count),
-          totalCredits: 0
+          totalUsers: parseInt(users.rows[0].count),
+          totalLinks: parseInt(links.rows[0].count),
+          totalReferrals: parseInt(referrals.rows[0].count),
+          approvedReferrals: parseInt(approved.rows[0].count),
+          pendingReferrals: parseInt(pending.rows[0].count),
+          rejectedReferrals: parseInt(rejected.rows[0].count),
+          totalCredits: parseFloat(credits.rows[0].total || 0)
         }
       })
     };
