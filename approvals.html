@@ -4,7 +4,369 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Approvals - Admin Panel</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Importing a modern, clean font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+        :root {
+            /* Define color palette */
+            --primary-color: #5d5dff; /* Blue/Purple Accent */
+            --secondary-color: #3f78ff;
+            --background-color: #1a1b26; /* Dark Background */
+            --surface-color: #24283b; /* Card/Sidebar Background */
+            --text-color: #c0caf5; /* Light Text */
+            --subtle-text: #7d8498;
+            --success-color: #73daca;
+            --danger-color: #f7768e;
+            --warning-color: #ff9e64; /* Orange for balance/amount */
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* --- Layout Container --- */
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* --- Sidebar (Navigation) --- */
+        .sidebar {
+            width: 250px;
+            background-color: var(--surface-color);
+            padding: 20px 0;
+            box-shadow: 4px 0 10px var(--shadow-dark);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .nav-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid #3b4261;
+            margin-bottom: 20px;
+        }
+
+        .nav-header h2 {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border-left: 5px solid transparent;
+        }
+
+        .nav-menu li a:hover {
+            background-color: #2e334a;
+            color: #ffffff;
+            border-left-color: var(--secondary-color);
+        }
+
+        .nav-menu li a.active {
+            background-color: #3b4261;
+            color: #ffffff;
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* --- Main Content Area --- */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Enable scrolling for main content */
+            padding: 0 30px 20px 30px; 
+        }
+
+        /* --- Top Bar (Header) --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #3b4261;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background-color: var(--background-color);
+            z-index: 5;
+        }
+
+        .top-bar h1 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info span {
+            background-color: var(--surface-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Action Button in Header --- */
+        /* Removed btn-primary style as it is not used in this specific header */
+
+        /* --- Content Area Specifics --- */
+        .content {
+            flex-grow: 1;
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px var(--shadow-dark);
+        }
+        
+        /* --- Table Styling --- */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background-color: #3b4261;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        th {
+            padding: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #3b4261;
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #2e334a;
+        }
+
+        td {
+            padding: 15px;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        /* Status cell styling (Success for Approved, Danger for Rejected, Warning for Pending) */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-block; /* Added for better badge appearance */
+        }
+        .status-approved {
+            background-color: var(--success-color);
+            color: var(--background-color);
+        }
+        .status-rejected {
+            background-color: var(--danger-color);
+            color: #ffffff;
+        }
+        .status-pending {
+            background-color: var(--warning-color);
+            color: var(--background-color);
+        }
+        
+        /* Action Button Styling for Review/Approve/Reject */
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
+            margin-right: 5px; /* Spacing between buttons in a group */
+        }
+        
+        .btn-primary { /* Used for 'Review' button */
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-success { /* Used for 'Submit' (Approve/Reject) in modal */
+            background-color: var(--success-color);
+            color: var(--background-color);
+        }
+
+        .btn-success:hover {
+            background-color: #61dfc5;
+        }
+
+        .btn-danger { /* Used for 'Cancel' in modal */
+            background-color: var(--danger-color);
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background-color: #e66379;
+        }
+
+        /* Filter Bar Styling */
+        .filter-bar {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end; /* Align filter to the right */
+        }
+        
+        .filter-bar select {
+            padding: 10px 15px;
+            border: 1px solid #3b4261;
+            border-radius: 6px;
+            background-color: #1a1b26;
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* --- MODAL STYLING (Approval Modal) --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 100; /* High z-index to cover everything */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            margin: 10% auto; /* Center vertically and horizontally */
+            padding: 30px;
+            border: 1px solid #3b4261;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 10px 25px var(--shadow-dark);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .close {
+            color: var(--subtle-text);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--danger-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .modal-content input[type="text"],
+        .modal-content select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #3b4261;
+            border-radius: 6px;
+            background-color: #1a1b26;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group button {
+            /* Grouping for buttons in the modal form */
+            margin-top: 10px;
+            width: auto;
+        }
+        
+        .form-group button[type="submit"] {
+            /* Full width button in original code, adjusting for grouped buttons */
+            width: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -24,7 +386,7 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <h1>Referral Approvals</h1>
+                <h1>✅ Referral Approvals</h1>
                 <div class="user-info">
                     <span id="adminName">Admin</span>
                 </div>
@@ -32,7 +394,7 @@
 
             <div class="content">
                 <div class="filter-bar">
-                    <select id="statusFilter">
+                    <select id="statusFilter" onchange="filterReferrals()">
                         <option value="">All Referrals</option>
                         <option value="pending">⏳ Pending</option>
                         <option value="approved">✅ Approved</option>
@@ -62,7 +424,6 @@
         </main>
     </div>
 
-    <!-- Approval Modal -->
     <div id="approvalModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeApprovalModal()">&times;</span>
@@ -93,35 +454,58 @@
     </div>
 
     <script>
-        let allReferrals = [];
+        let allReferrals = [
+            // Dummy Data for demonstration until backend is fully integrated
+            { id: 101, referred_name: "John Doe", referred_email: "john@example.com", referred_phone: "555-1234", status: "pending", created_at: "2025-12-01T10:00:00Z" },
+            { id: 102, referred_name: "Jane Smith", referred_email: "jane@example.com", referred_phone: "555-5678", status: "approved", created_at: "2025-11-28T15:30:00Z" },
+            { id: 103, referred_name: "Mike Brown", referred_email: "mike@example.com", referred_phone: null, status: "pending", created_at: "2025-12-03T09:15:00Z" },
+            { id: 104, referred_name: "Alice Green", referred_email: "alice@example.com", referred_phone: "555-9012", status: "rejected", created_at: "2025-11-25T11:45:00Z" }
+        ];
 
         function checkAuth() {
+            // Simplified auth check for standalone HTML
             const admin = localStorage.getItem('adminUser');
+            // Mocking a logged-in admin for this example if not found
             if (!admin) {
-                window.location.href = '/index.html';
+                localStorage.setItem('adminUser', JSON.stringify({ username: 'SuperAdmin' }));
             }
-            const adminUser = JSON.parse(admin);
+            const adminUser = JSON.parse(localStorage.getItem('adminUser'));
             document.getElementById('adminName').textContent = adminUser.username;
         }
 
         function logout() {
             if (confirm('Logout?')) {
                 localStorage.removeItem('adminUser');
-                window.location.href = '/index.html';
+                // window.location.href = '/index.html'; // Uncomment for real app
+                alert('Logged out. Reload page to mock login.');
             }
         }
 
+        // Mock function for loading referrals. Replace with actual fetch in a real app.
         async function loadReferrals() {
-            try {
-                const response = await fetch('/.netlify/functions/get-approval-history');
-                const data = await response.json();
+            // In a real application, this would fetch data from the Netlify function.
+            // For this static HTML, we use the dummy data above.
+            
+            // Simulating API call delay
+            await new Promise(resolve => setTimeout(resolve, 500)); 
+            
+            const tbody = document.getElementById('approvalsTable');
+            if (allReferrals.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No referrals found</td></tr>';
+            } else {
+                displayReferrals(allReferrals);
+            }
+        }
 
-                if (data.success && data.history) {
-                    allReferrals = data.history;
-                    displayReferrals(allReferrals);
-                }
-            } catch (error) {
-                console.error('Error:', error);
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'approved':
+                    return '<span class="status-badge status-approved">✅ Approved</span>';
+                case 'rejected':
+                    return '<span class="status-badge status-rejected">❌ Rejected</span>';
+                case 'pending':
+                default:
+                    return '<span class="status-badge status-pending">⏳ Pending</span>';
             }
         }
 
@@ -130,12 +514,12 @@
             tbody.innerHTML = '';
 
             if (referrals.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No referrals found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No referrals found for this status.</td></tr>';
                 return;
             }
 
             referrals.forEach(ref => {
-                const statusBadge = ref.status === 'approved' ? '✅ Approved' : ref.status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
+                const statusBadgeHtml = getStatusBadge(ref.status);
                 const date = new Date(ref.created_at).toLocaleDateString('en-IN');
                 const canAction = ref.status === 'pending';
                 
@@ -145,7 +529,7 @@
                         <td>${ref.referred_name}</td>
                         <td>${ref.referred_email}</td>
                         <td>${ref.referred_phone || 'N/A'}</td>
-                        <td>${statusBadge}</td>
+                        <td>${statusBadgeHtml}</td>
                         <td>${date}</td>
                         <td>
                             ${canAction ? `<button class="btn btn-primary" onclick="openApprovalModal(${ref.id}, '${ref.referred_name}')">Review</button>` : '-'}
@@ -170,40 +554,42 @@
         async function submitApproval(event) {
             event.preventDefault();
 
-            const referralId = document.getElementById('approvalReferralId').value;
+            const referralId = parseInt(document.getElementById('approvalReferralId').value);
             const status = document.getElementById('approvalStatus').value;
             const admin = JSON.parse(localStorage.getItem('adminUser'));
 
-            try {
-                const response = await fetch('/.netlify/functions/approve-referral', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        referralId: parseInt(referralId),
-                        status,
-                        approvedBy: admin.username
-                    })
-                });
+            if (!status) {
+                 alert("Please select an action (Approve or Reject).");
+                 return;
+            }
 
-                const data = await response.json();
-
-                if (data.success) {
-                    alert(`✅ Referral ${status}!`);
-                    closeApprovalModal();
-                    loadReferrals();
-                } else {
-                    alert('❌ Error: ' + (data.error || 'Failed'));
-                }
-            } catch (error) {
-                alert('❌ Error: ' + error.message);
+            // In a real app, this would be a fetch call to the serverless function.
+            // const response = await fetch('/.netlify/functions/approve-referral', {...});
+            
+            // Mocking the update for the static data:
+            const referralIndex = allReferrals.findIndex(r => r.id === referralId);
+            if (referralIndex !== -1) {
+                allReferrals[referralIndex].status = status;
+                allReferrals[referralIndex].approvedBy = admin.username; // Mock logging admin
+                allReferrals[referralIndex].approvedAt = new Date().toISOString(); // Mock timestamp
+                
+                alert(`✅ Referral ${status}!`);
+                closeApprovalModal();
+                filterReferrals(); // Reload data with current filter
+            } else {
+                alert('❌ Error: Referral not found locally.');
             }
         }
 
-        document.getElementById('statusFilter').addEventListener('change', (e) => {
-            const status = e.target.value;
+        function filterReferrals() {
+            const status = document.getElementById('statusFilter').value;
             const filtered = status ? allReferrals.filter(r => r.status === status) : allReferrals;
             displayReferrals(filtered);
-        });
+        }
+        
+        // Expose filterReferrals to the global scope for the onchange event
+        window.filterReferrals = filterReferrals;
+
 
         window.addEventListener('DOMContentLoaded', () => {
             checkAuth();
