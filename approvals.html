@@ -140,9 +140,6 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        /* --- Action Button in Header --- */
-        /* Removed btn-primary style as it is not used in this specific header */
-
         /* --- Content Area Specifics --- */
         .content {
             flex-grow: 1;
@@ -195,13 +192,13 @@
             vertical-align: middle;
         }
 
-        /* Status cell styling (Success for Approved, Danger for Rejected, Warning for Pending) */
+        /* Status cell styling (Adjusted names for Approval status) */
         .status-badge {
             padding: 5px 10px;
             border-radius: 4px;
             font-weight: 600;
             font-size: 0.85rem;
-            display: inline-block; /* Added for better badge appearance */
+            display: inline-block;
         }
         .status-approved {
             background-color: var(--success-color);
@@ -225,7 +222,7 @@
             font-weight: 600;
             transition: background-color 0.3s;
             font-size: 0.9rem;
-            margin-right: 5px; /* Spacing between buttons in a group */
+            margin-right: 5px; 
         }
         
         .btn-primary { /* Used for 'Review' button */
@@ -259,7 +256,7 @@
         .filter-bar {
             margin-bottom: 20px;
             display: flex;
-            justify-content: flex-end; /* Align filter to the right */
+            justify-content: flex-end; 
         }
         
         .filter-bar select {
@@ -357,13 +354,7 @@
         }
 
         .form-group button {
-            /* Grouping for buttons in the modal form */
             margin-top: 10px;
-            width: auto;
-        }
-        
-        .form-group button[type="submit"] {
-            /* Full width button in original code, adjusting for grouped buttons */
             width: auto;
         }
     </style>
@@ -386,7 +377,7 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <h1>✅ Referral Approvals</h1>
+                <h1>Referral Approvals</h1>
                 <div class="user-info">
                     <span id="adminName">Admin</span>
                 </div>
@@ -454,58 +445,35 @@
     </div>
 
     <script>
-        let allReferrals = [
-            // Dummy Data for demonstration until backend is fully integrated
-            { id: 101, referred_name: "John Doe", referred_email: "john@example.com", referred_phone: "555-1234", status: "pending", created_at: "2025-12-01T10:00:00Z" },
-            { id: 102, referred_name: "Jane Smith", referred_email: "jane@example.com", referred_phone: "555-5678", status: "approved", created_at: "2025-11-28T15:30:00Z" },
-            { id: 103, referred_name: "Mike Brown", referred_email: "mike@example.com", referred_phone: null, status: "pending", created_at: "2025-12-03T09:15:00Z" },
-            { id: 104, referred_name: "Alice Green", referred_email: "alice@example.com", referred_phone: "555-9012", status: "rejected", created_at: "2025-11-25T11:45:00Z" }
-        ];
+        let allReferrals = [];
 
         function checkAuth() {
-            // Simplified auth check for standalone HTML
             const admin = localStorage.getItem('adminUser');
-            // Mocking a logged-in admin for this example if not found
             if (!admin) {
-                localStorage.setItem('adminUser', JSON.stringify({ username: 'SuperAdmin' }));
+                window.location.href = '/index.html';
             }
-            const adminUser = JSON.parse(localStorage.getItem('adminUser'));
+            const adminUser = JSON.parse(admin);
             document.getElementById('adminName').textContent = adminUser.username;
         }
 
         function logout() {
             if (confirm('Logout?')) {
                 localStorage.removeItem('adminUser');
-                // window.location.href = '/index.html'; // Uncomment for real app
-                alert('Logged out. Reload page to mock login.');
+                window.location.href = '/index.html';
             }
         }
 
-        // Mock function for loading referrals. Replace with actual fetch in a real app.
         async function loadReferrals() {
-            // In a real application, this would fetch data from the Netlify function.
-            // For this static HTML, we use the dummy data above.
-            
-            // Simulating API call delay
-            await new Promise(resolve => setTimeout(resolve, 500)); 
-            
-            const tbody = document.getElementById('approvalsTable');
-            if (allReferrals.length === 0) {
-                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No referrals found</td></tr>';
-            } else {
-                displayReferrals(allReferrals);
-            }
-        }
+            try {
+                const response = await fetch('/.netlify/functions/get-approval-history');
+                const data = await response.json();
 
-        function getStatusBadge(status) {
-            switch(status) {
-                case 'approved':
-                    return '<span class="status-badge status-approved">✅ Approved</span>';
-                case 'rejected':
-                    return '<span class="status-badge status-rejected">❌ Rejected</span>';
-                case 'pending':
-                default:
-                    return '<span class="status-badge status-pending">⏳ Pending</span>';
+                if (data.success && data.history) {
+                    allReferrals = data.history;
+                    displayReferrals(allReferrals);
+                }
+            } catch (error) {
+                console.error('Error:', error);
             }
         }
 
@@ -514,12 +482,21 @@
             tbody.innerHTML = '';
 
             if (referrals.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No referrals found for this status.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No referrals found</td></tr>';
                 return;
             }
 
             referrals.forEach(ref => {
-                const statusBadgeHtml = getStatusBadge(ref.status);
+                // Corrected status badge rendering to use the provided CSS classes
+                let statusBadgeHtml;
+                if (ref.status === 'approved') {
+                    statusBadgeHtml = '<span class="status-badge status-approved">✅ Approved</span>';
+                } else if (ref.status === 'rejected') {
+                    statusBadgeHtml = '<span class="status-badge status-rejected">❌ Rejected</span>';
+                } else {
+                    statusBadgeHtml = '<span class="status-badge status-pending">⏳ Pending</span>';
+                }
+
                 const date = new Date(ref.created_at).toLocaleDateString('en-IN');
                 const canAction = ref.status === 'pending';
                 
@@ -554,42 +531,46 @@
         async function submitApproval(event) {
             event.preventDefault();
 
-            const referralId = parseInt(document.getElementById('approvalReferralId').value);
+            const referralId = document.getElementById('approvalReferralId').value;
             const status = document.getElementById('approvalStatus').value;
             const admin = JSON.parse(localStorage.getItem('adminUser'));
 
-            if (!status) {
-                 alert("Please select an action (Approve or Reject).");
-                 return;
-            }
+            try {
+                const response = await fetch('/.netlify/functions/approve-referral', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        referralId: parseInt(referralId),
+                        status,
+                        approvedBy: admin.username
+                    })
+                });
 
-            // In a real app, this would be a fetch call to the serverless function.
-            // const response = await fetch('/.netlify/functions/approve-referral', {...});
-            
-            // Mocking the update for the static data:
-            const referralIndex = allReferrals.findIndex(r => r.id === referralId);
-            if (referralIndex !== -1) {
-                allReferrals[referralIndex].status = status;
-                allReferrals[referralIndex].approvedBy = admin.username; // Mock logging admin
-                allReferrals[referralIndex].approvedAt = new Date().toISOString(); // Mock timestamp
-                
-                alert(`✅ Referral ${status}!`);
-                closeApprovalModal();
-                filterReferrals(); // Reload data with current filter
-            } else {
-                alert('❌ Error: Referral not found locally.');
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`✅ Referral ${status}!`);
+                    closeApprovalModal();
+                    loadReferrals();
+                } else {
+                    alert('❌ Error: ' + (data.error || 'Failed'));
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
             }
         }
 
+        // Renamed function to filterReferrals to match the HTML
         function filterReferrals() {
             const status = document.getElementById('statusFilter').value;
             const filtered = status ? allReferrals.filter(r => r.status === status) : allReferrals;
             displayReferrals(filtered);
         }
-        
-        // Expose filterReferrals to the global scope for the onchange event
-        window.filterReferrals = filterReferrals;
 
+        // Event listener remains unchanged
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            filterReferrals();
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             checkAuth();
