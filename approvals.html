@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users - Admin Panel</title>
+    <title>Approvals - Admin Panel</title>
     <style>
         /* Importing a modern, clean font */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
@@ -140,13 +140,12 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        /* --- Search Bar --- */
-        .search-bar {
+        /* --- Filter Bar --- */
+        .filter-bar {
             margin-bottom: 20px;
         }
 
-        #searchUsers {
-            width: 100%;
+        #statusFilter {
             padding: 12px 15px;
             border: 1px solid #3b4261;
             border-radius: 6px;
@@ -154,9 +153,10 @@
             color: var(--text-color);
             font-size: 1rem;
             transition: border-color 0.3s;
+            cursor: pointer;
         }
 
-        #searchUsers:focus {
+        #statusFilter:focus {
             outline: none;
             border-color: var(--primary-color);
         }
@@ -213,6 +213,30 @@
             vertical-align: middle;
         }
 
+        /* Status Badge Styling */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        .status-approved {
+            background-color: var(--success-color);
+            color: var(--background-color);
+        }
+
+        .status-rejected {
+            background-color: var(--danger-color);
+            color: #ffffff;
+        }
+
+        .status-pending {
+            background-color: var(--warning-color);
+            color: var(--background-color);
+        }
+
         /* --- Action Buttons --- */
         .btn {
             padding: 8px 12px;
@@ -237,6 +261,16 @@
             background-color: var(--secondary-color);
         }
 
+        .btn-success {
+            background-color: var(--success-color);
+            color: var(--background-color);
+            font-weight: 700;
+        }
+
+        .btn-success:hover {
+            background-color: #61dfc5;
+        }
+
         .btn-danger {
             background-color: var(--danger-color);
             color: white;
@@ -246,7 +280,7 @@
             background-color: #e74c3c;
         }
 
-        /* --- MODAL STYLING (Edit Modal) --- */
+        /* --- MODAL STYLING (Approval Modal) --- */
         .modal {
             display: none;
             position: fixed;
@@ -312,7 +346,7 @@
         }
 
         .modal-content input[type="text"],
-        .modal-content input[type="email"] {
+        .modal-content select {
             width: 100%;
             padding: 12px;
             border: 1px solid #3b4261;
@@ -323,21 +357,25 @@
             transition: border-color 0.3s;
         }
 
-        .modal-content input:focus {
+        .modal-content input:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
             outline: none;
             border-color: var(--primary-color);
         }
 
         /* Modal Button Group */
-        .form-group.button-group {
+        .form-group {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
         }
 
-        .form-group.button-group button {
+        .form-group button {
             flex: 1;
-            width: auto;
             padding: 12px;
             border: none;
             border-radius: 6px;
@@ -347,22 +385,32 @@
             transition: background-color 0.3s;
         }
 
-        .form-group.button-group .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
+        .form-group .btn-success {
+            background-color: var(--success-color);
+            color: var(--background-color);
         }
 
-        .form-group.button-group .btn-primary:hover {
-            background-color: var(--secondary-color);
+        .form-group .btn-success:hover {
+            background-color: #61dfc5;
         }
 
-        .form-group.button-group .btn-danger {
+        .form-group .btn-danger {
             background-color: var(--danger-color);
             color: white;
         }
 
-        .form-group.button-group .btn-danger:hover {
+        .form-group .btn-danger:hover {
             background-color: #e74c3c;
+        }
+
+        /* Separate styling for form-group that contains inputs vs buttons */
+        .form-group:not(:last-child) {
+            display: block;
+        }
+
+        .form-group:last-child {
+            display: flex;
+            margin-top: 20px;
         }
 
         /* Responsive adjustments */
@@ -419,6 +467,14 @@
                 margin: 20% auto;
                 padding: 20px;
             }
+
+            .filter-bar {
+                margin-bottom: 15px;
+            }
+
+            #statusFilter {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -430,8 +486,8 @@
             </div>
             <ul class="nav-menu">
                 <li><a href="/dashboard.html">📊 Dashboard</a></li>
-                <li><a href="/users.html" class="active">👥 Users</a></li>
-                <li><a href="/approvals.html">✅ Approvals</a></li>
+                <li><a href="/users.html">👥 Users</a></li>
+                <li><a href="/approvals.html" class="active">✅ Approvals</a></li>
                 <li><a href="/credits.html">💰 Credits</a></li>
                 <li><a href="/history.html">📜 History</a></li>
                 <li><a href="#" onclick="logout(); return false;">🚪 Logout</a></li>
@@ -440,14 +496,19 @@
 
         <main class="main-content">
             <header class="top-bar">
-                <h1>👥 User Management</h1>
+                <h1>✅ Referral Approvals</h1>
                 <div class="user-info">
                     <span id="adminName">Admin</span>
                 </div>
             </header>
 
-            <div class="search-bar">
-                <input type="text" id="searchUsers" placeholder="Search users by name, email, or username...">
+            <div class="filter-bar">
+                <select id="statusFilter">
+                    <option value="">All Referrals</option>
+                    <option value="pending">⏳ Pending</option>
+                    <option value="approved">✅ Approved</option>
+                    <option value="rejected">❌ Rejected</option>
+                </select>
             </div>
 
             <div class="content">
@@ -456,15 +517,16 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Username</th>
+                                <th>Name</th>
                                 <th>Email</th>
-                                <th>Full Name</th>
-                                <th>Created</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="usersTable">
-                            <tr><td colspan="6" style="text-align: center;">Loading users...</td></tr>
+                        <tbody id="approvalsTable">
+                            <tr><td colspan="7" style="text-align: center;">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -472,39 +534,43 @@
         </main>
     </div>
 
-    <div id="editModal" class="modal">
+    <!-- Approval Modal -->
+    <div id="approvalModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeEditModal()">&times;</span>
-            <h2>✏️ Edit User Details</h2>
-            <form onsubmit="saveUserChanges(event)">
-                <input type="hidden" id="editUserId">
+            <span class="close" onclick="closeApprovalModal()">&times;</span>
+            <h2>Process Referral</h2>
+            <form onsubmit="submitApproval(event)">
+                <input type="hidden" id="approvalReferralId">
 
                 <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="editFullName" required>
+                    <label>Referred Name</label>
+                    <input type="text" id="approvalRefName" disabled>
                 </div>
 
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="editEmail" required>
+                    <label>Status</label>
+                    <select id="approvalStatus" required>
+                        <option value="">Select Action</option>
+                        <option value="approved">✅ Approve</option>
+                        <option value="rejected">❌ Reject</option>
+                    </select>
                 </div>
 
-                <div class="form-group button-group">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-danger" onclick="closeEditModal()">Cancel</button>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    <button type="button" class="btn btn-danger" onclick="closeApprovalModal()">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        let allUsers = [];
+        let allReferrals = [];
 
         function checkAuth() {
             const admin = localStorage.getItem('adminUser');
             if (!admin) {
                 window.location.href = '/index.html';
-                return;
             }
             const adminUser = JSON.parse(admin);
             document.getElementById('adminName').textContent = adminUser.username;
@@ -518,43 +584,52 @@
             }
         }
 
-        async function loadUsers() {
+        async function loadReferrals() {
             try {
-                const response = await fetch('/.netlify/functions/get-all-users');
+                const response = await fetch('/.netlify/functions/get-approval-history');
                 const data = await response.json();
 
-                if (data.success && data.users) {
-                    allUsers = data.users;
-                    displayUsers(allUsers);
-                } else {
-                    console.error('Error:', data.error);
+                if (data.success && data.history) {
+                    allReferrals = data.history;
+                    displayReferrals(allReferrals);
                 }
             } catch (error) {
-                console.error('Error loading users:', error);
+                console.error('Error:', error);
             }
         }
 
-        function displayUsers(users) {
-            const tbody = document.getElementById('usersTable');
+        function displayReferrals(referrals) {
+            const tbody = document.getElementById('approvalsTable');
             tbody.innerHTML = '';
 
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--subtle-text);">No users found</td></tr>';
+            if (referrals.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--subtle-text);">No referrals found</td></tr>';
                 return;
             }
 
-            users.forEach(user => {
-                const createdDate = new Date(user.created_at).toLocaleDateString('en-IN');
+            referrals.forEach(ref => {
+                let statusHTML = '';
+                if (ref.status === 'approved') {
+                    statusHTML = '<span class="status-badge status-approved">✅ Approved</span>';
+                } else if (ref.status === 'rejected') {
+                    statusHTML = '<span class="status-badge status-rejected">❌ Rejected</span>';
+                } else {
+                    statusHTML = '<span class="status-badge status-pending">⏳ Pending</span>';
+                }
+
+                const date = new Date(ref.created_at).toLocaleDateString('en-IN');
+                const canAction = ref.status === 'pending';
+
                 const row = `
                     <tr>
-                        <td>${user.id}</td>
-                        <td>${user.username}</td>
-                        <td>${user.email || '<span style="color: var(--subtle-text);">N/A</span>'}</td>
-                        <td>${user.full_name || '<span style="color: var(--subtle-text);">N/A</span>'}</td>
-                        <td>${createdDate}</td>
+                        <td>${ref.id}</td>
+                        <td>${ref.referred_name}</td>
+                        <td>${ref.referred_email}</td>
+                        <td>${ref.referred_phone || 'N/A'}</td>
+                        <td>${statusHTML}</td>
+                        <td>${date}</td>
                         <td>
-                            <button class="btn btn-primary" onclick="openEditModal(${user.id}, '${user.full_name || ''}', '${user.email || ''}')">✏️ Edit</button>
-                            <button class="btn btn-danger" onclick="deleteUser(${user.id})">🗑️ Delete</button>
+                            ${canAction ? `<button class="btn btn-primary" onclick="openApprovalModal(${ref.id}, '${ref.referred_name}')">Review</button>` : '-'}
                         </td>
                     </tr>
                 `;
@@ -562,90 +637,58 @@
             });
         }
 
-        function openEditModal(userId, fullName, email) {
-            document.getElementById('editUserId').value = userId;
-            document.getElementById('editFullName').value = fullName;
-            document.getElementById('editEmail').value = email;
-            document.getElementById('editModal').style.display = 'block';
+        function openApprovalModal(referralId, name) {
+            document.getElementById('approvalReferralId').value = referralId;
+            document.getElementById('approvalRefName').value = name;
+            document.getElementById('approvalStatus').value = '';
+            document.getElementById('approvalModal').style.display = 'block';
         }
 
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
+        function closeApprovalModal() {
+            document.getElementById('approvalModal').style.display = 'none';
         }
 
-        async function saveUserChanges(event) {
+        async function submitApproval(event) {
             event.preventDefault();
 
-            const userId = document.getElementById('editUserId').value;
-            const fullName = document.getElementById('editFullName').value;
-            const email = document.getElementById('editEmail').value;
+            const referralId = document.getElementById('approvalReferralId').value;
+            const status = document.getElementById('approvalStatus').value;
+            const admin = JSON.parse(localStorage.getItem('adminUser'));
 
             try {
-                const response = await fetch('/.netlify/functions/update-user', {
+                const response = await fetch('/.netlify/functions/approve-referral', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        userId: parseInt(userId),
-                        fullName,
-                        email
+                        referralId: parseInt(referralId),
+                        status,
+                        approvedBy: admin.username
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('✅ User updated successfully!');
-                    closeEditModal();
-                    loadUsers();
+                    alert(`✅ Referral ${status}!`);
+                    closeApprovalModal();
+                    loadReferrals();
                 } else {
-                    alert('❌ Error: ' + (data.error || 'Failed to update user'));
+                    alert('❌ Error: ' + (data.error || 'Failed'));
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Error updating user: ' + error.message);
+                alert('❌ Error: ' + error.message);
             }
         }
 
-        async function deleteUser(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (!confirm(`Are you sure you want to delete user "${user.username}"? This action cannot be undone.`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch('/.netlify/functions/delete-user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: parseInt(userId) })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('✅ User deleted successfully!');
-                    loadUsers();
-                } else {
-                    alert('❌ Error: ' + (data.error || 'Failed to delete user'));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Error deleting user: ' + error.message);
-            }
-        }
-
-        document.getElementById('searchUsers').addEventListener('keyup', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allUsers.filter(u => 
-                u.username.toLowerCase().includes(term) || 
-                (u.email && u.email.toLowerCase().includes(term)) ||
-                (u.full_name && u.full_name.toLowerCase().includes(term))
-            );
-            displayUsers(filtered);
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            const status = e.target.value;
+            const filtered = status ? allReferrals.filter(r => r.status === status) : allReferrals;
+            displayReferrals(filtered);
         });
 
         // Close modal when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
+            const modal = document.getElementById('approvalModal');
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
@@ -653,7 +696,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             checkAuth();
-            loadUsers();
+            loadReferrals();
         });
     </script>
 </body>
