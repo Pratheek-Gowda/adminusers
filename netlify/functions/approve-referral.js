@@ -6,28 +6,20 @@ const pool = new Pool({
 });
 
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
   try {
-    const { referralId, status, approvedBy } = JSON.parse(event.body);
-
-    const result = await pool.query(
-      'UPDATE referrals SET status = $1, approved_at = NOW(), approved_by_admin = $2 WHERE id = $3 RETURNING *',
-      [status, approvedBy, referralId]
-    );
-
-    if (result.rows.length === 0) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ success: false, error: 'Referral not found' })
-      };
-    }
+    const result = await pool.query(`
+      SELECT 
+        r.id, r.referred_name, r.referred_email, r.referred_phone, r.order_details,
+        r.status, r.created_at, r.approved_at, r.approved_by_admin,
+        rl.referral_code, rl.operator, rl.user_id
+      FROM referrals r
+      JOIN referral_links rl ON r.referral_link_id = rl.id
+      ORDER BY r.created_at DESC
+    `);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, referral: result.rows[0] })
+      body: JSON.stringify({ success: true, referrals: result.rows || [] })
     };
   } catch (error) {
     return {
